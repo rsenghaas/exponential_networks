@@ -15,6 +15,8 @@ import src.pathmap as pm
 import src.path as pth
 import src.intersection as scn
 
+import time
+
 colors = ['red','orange','green','purple', 'red', 'red', 'red']
 
 # Probably this should go somewhere else...
@@ -128,20 +130,38 @@ class network():
                 self.split = 1        
             for j in self.active_paths:
                 i = 0
-                while self.paths[j].mass[-1] < self.cutoff and self.paths[j].active:
+                t1 = 0
+                t2 = 0
+                while self.paths[j].mass[-1] < self.cutoff and self.paths[j].active and (i < steps or steps == 0):
                     if j == 0:
                         self.time.append(self.time[-1] + self.dt)
-                    if self.paths[j].active == True:
-                        self.paths[j].evolve(dt, self.curve.sw_differential, self.theta, self.expo)
-                        self.paths[j].update_map(i)
-                        i += 1
-                    if i > 100000:
+                    tic1 = time.time()
+                    self.paths[j].evolve(dt, self.curve.sw_differential, self.theta, self.expo)
+                    toc1 = time.time()
+                    t1 += toc1 - tic1
+                    tic2 = time.time()
+                    self.paths[j].update_map(i)
+                    toc2 = time.time()
+                    t2 += toc2 - tic2
+                    i += 1
+                    if i > 50000:
                         print("Terminated by steps")
                         break
+                print("path:", j)
+                print("evolve:", t1)
+                print("update:", t2)
+                tic3 = time.time()
                 for t in range(j + 1):
                     self.check_intersection(j, t)
+                toc3 = time.time()
+                t3 = toc3 - tic3
+                print("check:", t3)
+            tic4 = time.time()
             if k < gen:
                 self.create_paths()
+            toc4 = time.time()
+            t4 = toc4 - tic4
+            print("create:", t4)
 
 
     
@@ -211,6 +231,7 @@ class network():
 
 
     def create_paths(self):
+        print("In create path!")
         for s in range(len(self.intersections)):
             self.all_intersections.append(self.intersections[s])
 
@@ -266,6 +287,7 @@ class network():
                                 self.paths[-1].mass.append(0)
 
         self.intersections = []
+        print("Out create path!")
 
     def get_intersection(self, path_index, target_map, t1_range, t2_range):
         for t1 in range(t1_range[0], t1_range[1] - 1):

@@ -10,12 +10,13 @@ import src.pathmap as mp
 
 # Include default libraries (ideally not much needed)
 import numpy as np
+import time
 
 # Main function
 def main():
     dt = 1e-8
-    theta = -0.8
-    cutoff = 1000
+    theta = -0.02
+    cutoff = 100000
     expo_net = nw.network(sw.H_c3, dt, theta, cutoff, expo=True)
     print(expo_net.pts)
     expo_net.start_paths()
@@ -35,4 +36,7 @@ def main():
         print(expo_net.paths[j].mass[-1])
 
 if __name__ == '__main__':
+    tic = time.time()
     main()
+    toc = time.time()
+    print("Total time:", toc - tic)
